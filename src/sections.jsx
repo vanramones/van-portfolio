@@ -1,4 +1,8 @@
 import { useState } from 'react'
+import {
+  siReact, siTypescript, siJavascript, siNodedotjs, siExpress,
+  siHtml5, siCss, siGit, siGithub, siThreedotjs, siVite,
+} from 'simple-icons'
 
 export const CONTACT_HASH = '#/contact'
 
@@ -50,6 +54,7 @@ export function Nav() {
         Van<span>.dev</span>
       </a>
       <nav className="nav-links">
+        <a href="#about">About</a>
         <a href="#work">Work</a>
         <a href="#process">Process</a>
         <a href="#testimonials">Testimonials</a>
@@ -130,6 +135,80 @@ export function Hero() {
         })}
         </div>
       </div>
+      </div>
+    </section>
+  )
+}
+
+const STACK = [
+  [siReact],
+  [siTypescript],
+  [siJavascript],
+  [siNodedotjs],
+  [siExpress, 'ffffff'],
+  [siHtml5],
+  [siCss],
+  [siThreedotjs, 'ffffff'],
+  [siVite],
+  [siGit],
+  [siGithub, 'ffffff'],
+]
+
+export function About() {
+  return (
+    <section id="about" className="section">
+      <div className="section-inner about reveal">
+        <div className="about-copy">
+          <span className="badge badge-sm">About Me</span>
+          <h2 className="section-title left">
+            Hi, I&apos;m <span className="grad">Jovan Ramones</span>
+          </h2>
+          <p className="about-degree">Bachelor of Science in Information Technology</p>
+          <p>
+            I&apos;m a full-stack web developer and virtual assistant from the
+            Philippines, currently taking up BS Information Technology at Northwest
+            Samar State University. I build web apps with React, TypeScript and
+            Express, and I enjoy turning ideas into clean, fast and easy-to-use
+            products.
+          </p>
+          <p>
+            On the VA side, I help businesses stay organized — listing products,
+            handling admin work, encoding data and keeping CRMs clean and up to date.
+            I care about doing the small things right, communicating clearly and
+            delivering on time.
+          </p>
+          <p>
+            I&apos;m always learning — from project management and technical support
+            to AI tools — so I can bring more value to every client I work with.
+          </p>
+        </div>
+
+        <div className="about-side">
+          <blockquote className="verse">
+            <svg className="verse-mark" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M7.17 6C4.31 6 2 8.31 2 11.17V18h6.83v-6.83H5.41c0-1.89 1.53-3.41 3.42-3.41V6H7.17zm10 0C14.31 6 12 8.31 12 11.17V18h6.83v-6.83h-3.42c0-1.89 1.53-3.41 3.42-3.41V6h-1.66z" />
+            </svg>
+            <p>
+              Whatever you do, work at it with all your heart, as working for the
+              Lord, not for human masters.
+            </p>
+            <cite>Colossians 3:23</cite>
+          </blockquote>
+
+          <div className="stack">
+            <h3>Tech I Work With</h3>
+            <ul className="stack-grid">
+              {STACK.map(([icon, color]) => (
+                <li key={icon.slug} title={icon.title}>
+                  <svg viewBox="0 0 24 24" fill={`#${color ?? icon.hex}`} aria-hidden="true">
+                    <path d={icon.path} />
+                  </svg>
+                  <span>{icon.title}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
     </section>
   )
@@ -527,6 +606,7 @@ export function Footer() {
         </div>
         <div>
           <h4>Quick Links</h4>
+          <a href="#about">About</a>
           <a href="#work">Work</a>
           <a href="#process">Process</a>
           <a href="#testimonials">Testimonials</a>

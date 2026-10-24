@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import Frames from './Scene.jsx'
-import { Nav, Hero, Features, Process, Proof, Contact, Footer, CONTACT_HASH } from './sections.jsx'
+import { Nav, Hero, About, Features, Process, Proof, Contact, Footer, CONTACT_HASH } from './sections.jsx'
 
 const getRoute = () => (window.location.hash === CONTACT_HASH ? 'contact' : 'home')
 
@@ -64,6 +64,7 @@ export default function App() {
       ) : (
         <main>
           <Hero />
+          <About />
           <Features />
           <Process />
           <Proof />

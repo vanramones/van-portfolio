@@ -1,5 +1,7 @@
 import { useState } from 'react'
 
+export const CONTACT_HASH = '#/contact'
+
 const CheckIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="20 6 9 17 4 12" />
@@ -24,11 +26,10 @@ export function Nav() {
 
   const goToContact = (e) => {
     e.preventDefault()
-    if (phase !== 'idle') return
+    if (phase !== 'idle' || window.location.hash === CONTACT_HASH) return
     setPhase('in')
     setTimeout(() => {
-      const el = document.getElementById('contact')
-      if (el) window.scrollTo({ top: el.offsetTop, behavior: 'instant' })
+      window.location.hash = CONTACT_HASH
       setPhase('out')
       setTimeout(() => setPhase('idle'), 500)
     }, 1400)
@@ -63,7 +64,7 @@ export function Nav() {
         >
           <GithubIcon />
         </a>
-        <a className="btn btn-primary btn-sm" href="#contact" onClick={goToContact}>
+        <a className="btn btn-primary btn-sm" href={CONTACT_HASH} onClick={goToContact}>
           Let&apos;s Talk
         </a>
       </div>
@@ -241,8 +242,8 @@ export function Process() {
               </li>
             ))}
           </ul>
-          <a className="btn btn-primary" href="#contact">
-            See My Process <ArrowIcon />
+          <a className="btn btn-primary" href={CONTACT_HASH}>
+            Work With Me <ArrowIcon />
           </a>
         </div>
       </div>
@@ -336,20 +337,155 @@ const CERTS = [
   },
 ]
 
-export function Cta() {
+const ACCEPT = '.pdf,.doc,.docx,.txt,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.fig'
+const MAX_FILES = 5
+const MAX_SIZE = 10 * 1024 * 1024
+const ENDPOINT = import.meta.env.VITE_CONTACT_ENDPOINT
+
+const formatSize = (b) => (b < 1024 * 1024 ? `${Math.ceil(b / 1024)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`)
+
+export function Contact() {
+  const [files, setFiles] = useState([])
+  const [dragging, setDragging] = useState(false)
+  const [status, setStatus] = useState({ type: 'idle', text: '' })
+
+  const addFiles = (list) => {
+    const ext = ACCEPT.split(',')
+    const incoming = [...list].filter((f) => ext.some((e) => f.name.toLowerCase().endsWith(e)))
+    const tooBig = incoming.filter((f) => f.size > MAX_SIZE)
+    const ok = incoming.filter((f) => f.size <= MAX_SIZE)
+    const merged = [...files, ...ok.filter((f) => !files.some((p) => p.name === f.name && p.size === f.size))]
+    if (merged.length > MAX_FILES) setStatus({ type: 'error', text: `Up to ${MAX_FILES} files only.` })
+    else if (tooBig.length) setStatus({ type: 'error', text: `${tooBig[0].name} is over 10 MB.` })
+    else if (incoming.length < list.length) setStatus({ type: 'error', text: 'Some files have an unsupported type.' })
+    else setStatus({ type: 'idle', text: '' })
+    setFiles(merged.slice(0, MAX_FILES))
+  }
+
+  const onSubmit = async (e) => {
+    e.preventDefault()
+    const form = e.currentTarget
+    if (!ENDPOINT) {
+      setStatus({ type: 'error', text: 'The contact form is not connected yet. Please try again later.' })
+      return
+    }
+    const data = new FormData(form)
+    data.delete('attachments')
+    files.forEach((f) => data.append('attachments', f))
+    setStatus({ type: 'sending', text: 'Sending…' })
+    try {
+      const res = await fetch(ENDPOINT, { method: 'POST', body: data, headers: { Accept: 'application/json' } })
+      if (!res.ok) throw new Error(res.statusText)
+      form.reset()
+      setFiles([])
+      setStatus({ type: 'success', text: 'Message sent! I’ll get back to you soon.' })
+    } catch {
+      setStatus({ type: 'error', text: 'Something went wrong. Please try again.' })
+    }
+  }
+
   return (
-    <section id="contact" className="section cta-section">
-      <div className="cta-banner reveal">
-        <div>
-          <h2>Have a project or task in mind?</h2>
-          <p>Web apps or admin backlogs — let&apos;s get it done, no middlemen.</p>
-        </div>
-        <div className="cta-side">
+    <section id="contact" className="section">
+      <div className="contact reveal">
+        <div className="contact-copy">
+          <a className="back-link" href="#top">← Back to home</a>
           <span className="cta-status"><span className="badge-dot" /> Available Now</span>
-          <a className="btn btn-primary" href="mailto:hello@van.dev">
-            Get in Touch <ArrowIcon />
-          </a>
+          <h2>Have a project or task in mind?</h2>
+          <p>
+            Web apps or admin backlogs — tell me about it. Attach your PDFs, interface
+            designs, documents, guides or objectives and I&apos;ll review them.
+          </p>
+          <ul className="checklist">
+            <li><span className="check-box"><CheckIcon /></span> Reply within 24 hours</li>
+            <li><span className="check-box"><CheckIcon /></span> Your files stay private</li>
+          </ul>
+
+          <div className="direct">
+            <h3>Or reach me directly</h3>
+            <div className="direct-row">
+              <a className="qr" href={TELEGRAM_URL} target="_blank" rel="noreferrer">
+                <img src="/telegram-qr.png" alt="Telegram QR code for @vanramones" />
+              </a>
+              <div className="direct-links">
+                <small>Scan to chat on Telegram</small>
+                <a className="direct-link" href={TELEGRAM_URL} target="_blank" rel="noreferrer">
+                  <TelegramIcon /> @vanramones
+                </a>
+                <a className="direct-link" href={FACEBOOK_URL} target="_blank" rel="noreferrer">
+                  <FacebookIcon /> Vann Ramones
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <form className="contact-form" onSubmit={onSubmit}>
+          <div className="field-row">
+            <label className="field">
+              <span>Name</span>
+              <input name="name" type="text" required autoComplete="name" placeholder="Your name" />
+            </label>
+            <label className="field">
+              <span>Email</span>
+              <input name="email" type="email" required autoComplete="email" placeholder="you@email.com" />
+            </label>
+          </div>
+          <label className="field">
+            <span>Subject</span>
+            <input name="subject" type="text" required placeholder="e.g. Landing page redesign" />
+          </label>
+          <label className="field">
+            <span>Message</span>
+            <textarea name="message" rows="5" required placeholder="Tell me about your project, goals and timeline…" />
+          </label>
+
+          <label
+            className={`dropzone ${dragging ? 'dragging' : ''}`}
+            onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={(e) => { e.preventDefault(); setDragging(false); addFiles(e.dataTransfer.files) }}
+          >
+            <input
+              name="attachments"
+              type="file"
+              multiple
+              accept={ACCEPT}
+              onChange={(e) => { addFiles(e.target.files); e.target.value = '' }}
+            />
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            <strong>Drop files here or click to upload</strong>
+            <small>PDF, interface designs, documents, guides, objectives — up to {MAX_FILES} files, 10 MB each</small>
+          </label>
+
+          {files.length > 0 && (
+            <ul className="file-list">
+              {files.map((f) => (
+                <li key={f.name + f.size}>
+                  <span className="file-name">{f.name}</span>
+                  <span className="file-size">{formatSize(f.size)}</span>
+                  <button
+                    type="button"
+                    aria-label={`Remove ${f.name}`}
+                    onClick={() => setFiles((prev) => prev.filter((p) => p !== f))}
+                  >
+                    ×
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <div className="form-footer">
+            {status.text && <p className={`form-status ${status.type}`} role="status">{status.text}</p>}
+            <button className="btn btn-primary" type="submit" disabled={status.type === 'sending'}>
+              {status.type === 'sending' ? 'Sending…' : 'Send Message'} <ArrowIcon />
+            </button>
+          </div>
+        </form>
       </div>
     </section>
   )
@@ -361,17 +497,20 @@ const GithubIcon = () => (
   </svg>
 )
 
-const LinkedinIcon = () => (
+const FacebookIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45z" />
+    <path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.89v2.26h3.33l-.53 3.49h-2.8V24C19.62 23.1 24 18.1 24 12.07z" />
   </svg>
 )
 
-const XIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M18.9 2H22l-6.77 7.74L23.2 22h-6.24l-4.89-6.4L6.47 22H3.34l7.24-8.28L2.6 2h6.4l4.42 5.85L18.9 2zm-1.1 18.1h1.73L7.62 3.8H5.75l12.05 16.3z" />
+const TelegramIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M23.91 3.79 20.3 20.84c-.25 1.21-.98 1.5-2 .94l-5.5-4.07-2.66 2.57c-.3.3-.55.56-1.1.56-.72 0-.6-.27-.84-.95L6.3 13.7l-5.45-1.7c-1.18-.35-1.19-1.16.26-1.75l21.26-8.2c.97-.43 1.9.24 1.53 1.73z" />
   </svg>
 )
+
+const FACEBOOK_URL = 'https://www.facebook.com/Vann.Ramones'
+const TELEGRAM_URL = 'https://t.me/vanramones'
 
 export function Footer() {
   return (
@@ -396,14 +535,14 @@ export function Footer() {
           <h4>Legal</h4>
           <a href="#top">Terms of Use</a>
           <a href="#top">Privacy Policy</a>
-          <a href="#top">Contact</a>
+          <a href={CONTACT_HASH}>Contact</a>
         </div>
         <div>
           <h4>Follow Me</h4>
           <div className="socials">
             <a href="https://github.com/vanramones" target="_blank" rel="noreferrer" aria-label="GitHub"><GithubIcon /></a>
-            <a href="https://linkedin.com" aria-label="LinkedIn"><LinkedinIcon /></a>
-            <a href="https://x.com" aria-label="X"><XIcon /></a>
+            <a href={FACEBOOK_URL} target="_blank" rel="noreferrer" aria-label="Facebook"><FacebookIcon /></a>
+            <a href={TELEGRAM_URL} target="_blank" rel="noreferrer" aria-label="Telegram"><TelegramIcon /></a>
           </div>
           <a href="https://github.com/vanramones" target="_blank" rel="noreferrer">
             github.com/vanramones

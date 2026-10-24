@@ -1,9 +1,31 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import Frames from './Scene.jsx'
-import { Nav, Hero, Features, Process, Proof, Cta, Footer } from './sections.jsx'
+import { Nav, Hero, Features, Process, Proof, Contact, Footer, CONTACT_HASH } from './sections.jsx'
 
-function useReveal() {
+const getRoute = () => (window.location.hash === CONTACT_HASH ? 'contact' : 'home')
+
+function useRoute() {
+  const [route, setRoute] = useState(getRoute)
+
+  useEffect(() => {
+    const onChange = () => setRoute(getRoute())
+    window.addEventListener('hashchange', onChange)
+    return () => window.removeEventListener('hashchange', onChange)
+  }, [])
+
+  useEffect(() => {
+    const anchor = route === 'home' && window.location.hash.length > 1
+      ? document.getElementById(window.location.hash.slice(1))
+      : null
+    if (anchor) anchor.scrollIntoView({ behavior: 'instant' })
+    else window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [route])
+
+  return route
+}
+
+function useReveal(route) {
   useEffect(() => {
     const io = new IntersectionObserver(
       (entries) => {
@@ -18,11 +40,12 @@ function useReveal() {
     )
     document.querySelectorAll('.reveal').forEach((el) => io.observe(el))
     return () => io.disconnect()
-  }, [])
+  }, [route])
 }
 
 export default function App() {
-  useReveal()
+  const route = useRoute()
+  useReveal(route)
 
   return (
     <>
@@ -34,13 +57,18 @@ export default function App() {
       </div>
 
       <Nav />
-      <main>
-        <Hero />
-        <Features />
-        <Process />
-        <Proof />
-        <Cta />
-      </main>
+      {route === 'contact' ? (
+        <main>
+          <Contact />
+        </main>
+      ) : (
+        <main>
+          <Hero />
+          <Features />
+          <Process />
+          <Proof />
+        </main>
+      )}
       <Footer />
     </>
   )

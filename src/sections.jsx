@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 const CheckIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="20 6 9 17 4 12" />
@@ -18,7 +20,30 @@ const StarIcon = () => (
 )
 
 export function Nav() {
+  const [phase, setPhase] = useState('idle')
+
+  const goToContact = (e) => {
+    e.preventDefault()
+    if (phase !== 'idle') return
+    setPhase('in')
+    setTimeout(() => {
+      const el = document.getElementById('contact')
+      if (el) window.scrollTo({ top: el.offsetTop, behavior: 'instant' })
+      setPhase('out')
+      setTimeout(() => setPhase('idle'), 500)
+    }, 1400)
+  }
+
   return (
+    <>
+    {phase !== 'idle' && (
+      <div className={`loader ${phase === 'out' ? 'loader-out' : ''}`} role="status" aria-live="polite">
+        <span className="loader-logo">
+          Van<span>.dev</span>
+        </span>
+        <span className="loader-bar"><span /></span>
+      </div>
+    )}
     <header className="nav">
       <a className="logo" href="#top">
         Van<span>.dev</span>
@@ -26,13 +51,9 @@ export function Nav() {
       <nav className="nav-links">
         <a href="#work">Work</a>
         <a href="#process">Process</a>
-        <a href="#about">About</a>
         <a href="#testimonials">Testimonials</a>
       </nav>
       <div className="nav-actions">
-        <a className="nav-login" href="#contact">
-          Resume
-        </a>
         <a
           className="nav-icon"
           href="https://github.com/vanramones"
@@ -42,29 +63,34 @@ export function Nav() {
         >
           <GithubIcon />
         </a>
-        <a className="btn btn-primary btn-sm" href="#contact">
+        <a className="btn btn-primary btn-sm" href="#contact" onClick={goToContact}>
           Let&apos;s Talk
         </a>
       </div>
     </header>
+    </>
   )
 }
 
 export function Hero() {
+  const [active, setActive] = useState(0)
+
   return (
     <section id="top" className="section hero">
-      <div className="hero-inner reveal">
+      <div className="hero-split reveal">
+      <div className="hero-inner">
         <span className="badge">
           <span className="badge-dot" /> Available for new projects
         </span>
         <h1>
-          Building Interfaces.
+          Full-Stack Developer.
           <br />
-          <span className="grad">That Feel Alive.</span>
+          <span className="grad">&amp; Reliable VA.</span>
         </h1>
         <p className="lede">
-          Creative developer crafting fast, immersive web experiences — from React
-          apps to scroll-driven WebGL stories like the one playing behind this text.
+          I build web apps with React, TypeScript and Express — and work as a
+          virtual assistant handling product listings, admin tasks and data
+          entry, keeping your CRM clean and organized.
         </p>
         <div className="hero-actions">
           <a className="btn btn-primary" href="#work">
@@ -73,11 +99,36 @@ export function Hero() {
           <span className="chip">Remote-friendly • Open to work</span>
         </div>
         <ul className="hero-checks">
-          <li><CheckIcon /> 3+ Years Experience</li>
-          <li><CheckIcon /> 20+ Projects Shipped</li>
-          <li><CheckIcon /> React &amp; Three.js</li>
-          <li><CheckIcon /> Pixel-perfect UI</li>
+          <li><CheckIcon /> React • TypeScript • Express</li>
+          <li><CheckIcon /> Product Listing</li>
+          <li><CheckIcon /> Admin &amp; Data Entry</li>
+          <li><CheckIcon /> CRM Organization</li>
         </ul>
+      </div>
+      <div className="hero-certs-wrap">
+        <span className="certs-label">My Certificates</span>
+        <div
+          className="hero-certs"
+          onClick={() => setActive((a) => (a + 1) % CERTS.length)}
+          title="Click to see next certificate"
+        >
+        {CERTS.map((c, i) => {
+          const d = (i - active + CERTS.length) % CERTS.length
+          return (
+            <img
+              key={c.title}
+              src={c.img}
+              alt={c.title}
+              style={{
+                transform: `translate(${d * 14}px, ${d * -12}px) rotate(${d * 4}deg) scale(${1 - d * 0.03})`,
+                zIndex: CERTS.length - d,
+                opacity: d > 2 ? 0 : 1 - d * 0.18,
+              }}
+            />
+          )
+        })}
+        </div>
+      </div>
       </div>
     </section>
   )
@@ -85,8 +136,8 @@ export function Hero() {
 
 const FEATURES = [
   {
-    title: 'Frontend Engineering',
-    text: 'Modern React apps with clean architecture that scales with your product.',
+    title: 'Full-Stack Developer',
+    text: 'End-to-end web apps built with React, TypeScript and Express.',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="16 18 22 12 16 6" />
@@ -95,31 +146,35 @@ const FEATURES = [
     ),
   },
   {
-    title: 'Creative WebGL',
-    text: 'Three.js scenes, custom shaders and scroll-driven storytelling that stands out.',
+    title: 'Product Listing',
+    text: 'Accurate, well-organized product listings for your e-commerce store.',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2l2.4 7.2H22l-6 4.4 2.3 7.4-6.3-4.6-6.3 4.6L8 13.6 2 9.2h7.6z" />
+        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z" />
+        <line x1="7" y1="7" x2="7.01" y2="7" />
       </svg>
     ),
   },
   {
-    title: 'UI/UX Design',
-    text: 'Interfaces that are beautiful, effortless to use and built for real people.',
+    title: 'Admin & Data Entry',
+    text: 'Fast, dependable admin support with error-free data entry.',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="18" height="18" rx="2" />
-        <line x1="3" y1="9" x2="21" y2="9" />
-        <line x1="9" y1="21" x2="9" y2="9" />
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+        <rect x="8" y="2" width="8" height="4" rx="1" />
+        <line x1="9" y1="12" x2="15" y2="12" />
+        <line x1="9" y1="16" x2="15" y2="16" />
       </svg>
     ),
   },
   {
-    title: 'Performance & SEO',
-    text: 'Fast loads, 60fps motion and markup that search engines love.',
+    title: 'CRM Management',
+    text: 'Contacts, pipelines and records kept clean, sorted and up to date.',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+        <ellipse cx="12" cy="5" rx="9" ry="3" />
+        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
       </svg>
     ),
   },
@@ -149,10 +204,10 @@ export function Features() {
 }
 
 const CHECKLIST = [
-  'Discover goals, users & constraints',
-  'Design in the browser, iterate fast',
-  'Build with a performance budget',
-  'Ship, measure and refine',
+  'Plan & build apps with React, TypeScript & Express',
+  'List products accurately and on schedule',
+  'Enter and verify data — zero sloppiness',
+  'Keep your CRM clean, sorted & up to date',
 ]
 
 export function Process() {
@@ -163,11 +218,11 @@ export function Process() {
           <div className="code-card-bar">
             <span /><span /><span />
           </div>
-          <pre>{`const developer = {
+          <pre>{`const freelancer = {
   name: 'Van',
-  role: 'Creative Developer',
-  stack: ['React', 'Three.js', 'Node'],
-  focus: 'immersive web',
+  role: 'Full-Stack Developer & VA',
+  stack: ['React', 'TypeScript', 'Express'],
+  va: ['product listing', 'data entry', 'CRM'],
   coffee: true,
   available: true,
 }`}</pre>
@@ -175,9 +230,9 @@ export function Process() {
         <div className="split-copy">
           <span className="badge badge-sm">Inside my workflow</span>
           <h2 className="section-title left">
-            A Playbook for
+            How I Handle
             <br />
-            <span className="grad">Design &amp; Development</span>
+            <span className="grad">Dev Work &amp; Admin Tasks</span>
           </h2>
           <ul className="checklist">
             {CHECKLIST.map((item) => (
@@ -196,9 +251,9 @@ export function Process() {
 }
 
 const STATS = [
-  { value: '20+', label: 'Projects Shipped' },
-  { value: '3+', label: 'Years of Experience' },
-  { value: '10+', label: 'Happy Clients' },
+  { value: '10+', label: 'Projects Completed' },
+  { value: '300+', label: 'Products Listed' },
+  { value: '5+', label: 'Happy Clients' },
 ]
 
 export function Proof() {
@@ -206,9 +261,9 @@ export function Proof() {
     <section id="testimonials" className="section">
       <div className="section-inner reveal">
         <h2 className="section-title">
-          Trusted by Founders
+          Trusted by Clients
           <br />
-          <span className="grad">&amp; Product Teams</span>
+          <span className="grad">&amp; Small Businesses</span>
         </h2>
         <div className="proof-row">
           <div className="stats">
@@ -224,15 +279,15 @@ export function Proof() {
               {Array.from({ length: 5 }).map((_, i) => <StarIcon key={i} />)}
             </div>
             <p>
-              &ldquo;Van completely changed the way our product feels. The
-              scroll-driven experience he built got us featured on three design
-              galleries and doubled our demo signups.&rdquo;
+              &ldquo;Van handles our product listings and keeps our CRM updated —
+              tasks that used to pile up are now always done on time. He&apos;s
+              easy to work with and very dependable.&rdquo;
             </p>
             <footer>
-              <span className="avatar">JR</span>
+              <span className="avatar">SM</span>
               <span>
-                <strong>James R.</strong>
-                <small>Product Lead</small>
+                <strong>Sarah M.</strong>
+                <small>Online Store Owner</small>
               </span>
             </footer>
           </blockquote>
@@ -242,13 +297,52 @@ export function Proof() {
   )
 }
 
+const CERTS = [
+  {
+    img: '/certs/cert-appkademiya-tpm.jpg',
+    title: 'Certified Technical Project Manager',
+    issuer: 'Appkademiya',
+    year: 'Aug 2026',
+  },
+  {
+    img: '/certs/cert-google-tech-support.jpg',
+    title: 'Technical Support Fundamentals',
+    issuer: 'Google via Coursera',
+    year: 'Sep 2026',
+  },
+  {
+    img: '/certs/cert-claude-code-101.jpg',
+    title: 'Claude Code 101',
+    issuer: 'Claude Academy',
+    year: 'Oct 2026',
+  },
+  {
+    img: '/certs/cert-claude-ai-capabilities.jpg',
+    title: 'AI Capabilities & Limitations',
+    issuer: 'Claude Academy',
+    year: 'Oct 2026',
+  },
+  {
+    img: '/certs/cert-nssu-research-seminar.jpg',
+    title: 'Research Seminar: Capstone Foundations',
+    issuer: 'Northwest Samar State University',
+    year: 'Feb 2026',
+  },
+  {
+    img: '/certs/cert-nssu-ip-bootcamp.jpg',
+    title: 'OWN IT: Intellectual Property Bootcamp',
+    issuer: 'Northwest Samar State University',
+    year: 'Sep 2026',
+  },
+]
+
 export function Cta() {
   return (
     <section id="contact" className="section cta-section">
       <div className="cta-banner reveal">
         <div>
-          <h2>Have a project in mind?</h2>
-          <p>Let&apos;s build something great together — no middlemen, just work that ships.</p>
+          <h2>Have a project or task in mind?</h2>
+          <p>Web apps or admin backlogs — let&apos;s get it done, no middlemen.</p>
         </div>
         <div className="cta-side">
           <span className="cta-status"><span className="badge-dot" /> Available Now</span>
@@ -288,14 +382,14 @@ export function Footer() {
             Van<span>.dev</span>
           </a>
           <p className="footer-blurb">
-            Creative developer building fast, immersive experiences for the modern web.
+            Full-stack web developer &amp; virtual assistant — building React/Express
+            apps and keeping your data organized.
           </p>
         </div>
         <div>
           <h4>Quick Links</h4>
           <a href="#work">Work</a>
           <a href="#process">Process</a>
-          <a href="#about">About</a>
           <a href="#testimonials">Testimonials</a>
         </div>
         <div>

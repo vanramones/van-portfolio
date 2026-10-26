@@ -17,14 +17,14 @@ function nearestLoaded(textures, index) {
   return -1
 }
 
-export default function Frames() {
+export default function Frames({ onFirstFrame }) {
   const material = useRef()
   const playback = useRef({ current: 0, last: -1 })
 
   const textures = useMemo(() => {
     const loader = new THREE.TextureLoader()
     return Array.from({ length: FRAME_COUNT }, (_, i) => {
-      const tex = loader.load(frameUrl(i))
+      const tex = loader.load(frameUrl(i), i === 0 ? onFirstFrame : undefined)
       tex.colorSpace = THREE.SRGBColorSpace
       tex.minFilter = THREE.LinearFilter
       tex.magFilter = THREE.LinearFilter

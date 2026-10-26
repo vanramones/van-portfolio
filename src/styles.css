@@ -898,6 +898,11 @@ main {
   gap: 7px;
 }
 
+.field-req {
+  color: #f87171;
+  font-size: 12px;
+}
+
 .field span {
   font-size: 13px;
   font-weight: 600;

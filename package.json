@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "admin": "node --env-file-if-exists=server/.env server/index.js"
   },
   "dependencies": {
     "@react-three/fiber": "9.8.2",
+    "express": "^5.3.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "simple-icons": "^16.35.0",

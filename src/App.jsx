@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import Frames from './Scene.jsx'
 import { Nav, Hero, About, Features, Process, Proof, Contact, Footer, CONTACT_HASH } from './sections.jsx'
@@ -47,11 +47,41 @@ export default function App() {
   const route = useRoute()
   useReveal(route)
 
+  const [splash, setSplash] = useState('in')
+  const start = useRef(Date.now())
+  const hidden = useRef(false)
+
+  const hideSplash = useCallback(() => {
+    if (hidden.current) return
+    hidden.current = true
+    const wait = Math.max(0, 1600 - (Date.now() - start.current))
+    setTimeout(() => setSplash('out'), wait)
+  }, [])
+
+  useEffect(() => {
+    const fallback = setTimeout(hideSplash, 5000)
+    return () => clearTimeout(fallback)
+  }, [hideSplash])
+
+  useEffect(() => {
+    if (splash !== 'out') return
+    const t = setTimeout(() => setSplash('done'), 550)
+    return () => clearTimeout(t)
+  }, [splash])
+
   return (
     <>
+      {splash !== 'done' && (
+        <div className={`loader ${splash === 'out' ? 'loader-out' : ''}`} role="status" aria-live="polite">
+          <span className="loader-logo">
+            Van<span>.dev</span>
+          </span>
+          <span className="loader-bar"><span /></span>
+        </div>
+      )}
       <div className="bg-canvas">
         <Canvas dpr={[1, 2]} gl={{ antialias: true, powerPreference: 'high-performance' }}>
-          <Frames />
+          <Frames onFirstFrame={hideSplash} />
         </Canvas>
         <div className="scrim" />
       </div>

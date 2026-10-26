@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   siReact, siTypescript, siJavascript, siNodedotjs, siExpress,
   siHtml5, siCss, siGit, siGithub, siThreedotjs, siVite,
@@ -27,17 +27,28 @@ const StarIcon = () => (
 
 export function Nav() {
   const [phase, setPhase] = useState('idle')
+  const busy = useRef(false)
 
-  const goToContact = (e) => {
-    e.preventDefault()
-    if (phase !== 'idle' || window.location.hash === CONTACT_HASH) return
-    setPhase('in')
-    setTimeout(() => {
-      window.location.hash = CONTACT_HASH
-      setPhase('out')
-      setTimeout(() => setPhase('idle'), 500)
-    }, 1400)
-  }
+  useEffect(() => {
+    const onClick = (e) => {
+      const link = e.target.closest?.(`a[href="${CONTACT_HASH}"]`)
+      if (!link || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+      e.preventDefault()
+      if (busy.current || window.location.hash === CONTACT_HASH) return
+      busy.current = true
+      setPhase('in')
+      setTimeout(() => {
+        window.location.hash = CONTACT_HASH
+        setPhase('out')
+        setTimeout(() => {
+          setPhase('idle')
+          busy.current = false
+        }, 500)
+      }, 1400)
+    }
+    document.addEventListener('click', onClick)
+    return () => document.removeEventListener('click', onClick)
+  }, [])
 
   return (
     <>
@@ -69,7 +80,7 @@ export function Nav() {
         >
           <GithubIcon />
         </a>
-        <a className="btn btn-primary btn-sm" href={CONTACT_HASH} onClick={goToContact}>
+        <a className="btn btn-primary btn-sm" href={CONTACT_HASH}>
           Let&apos;s Talk
         </a>
       </div>
@@ -89,9 +100,9 @@ export function Hero() {
           <span className="badge-dot" /> Available for new projects
         </span>
         <h1>
-          Full-Stack Developer.
+          Full-Stack Developer
           <br />
-          <span className="grad">&amp; Reliable VA.</span>
+          <span className="grad">&amp; Reliable VA</span>
         </h1>
         <p className="lede">
           I build web apps with React, TypeScript and Express — and work as a
@@ -419,7 +430,51 @@ const CERTS = [
 const ACCEPT = '.pdf,.doc,.docx,.txt,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.fig'
 const MAX_FILES = 5
 const MAX_SIZE = 10 * 1024 * 1024
-const ENDPOINT = import.meta.env.VITE_CONTACT_ENDPOINT
+
+/* Upload a single file via the server-side signed-URL endpoint (uses service key) */
+async function uploadFile(file) {
+  // 1. Get a signed upload URL from our Vercel function
+  const signRes = await fetch('/api/upload-url', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ filename: file.name, type: file.type }),
+  })
+  const signJson = await signRes.json()
+  if (!signRes.ok) throw new Error(signJson.error || 'Could not get upload URL')
+
+  // 2. PUT the file directly to Supabase Storage using the signed URL
+  const upRes = await fetch(signJson.signedUrl, {
+    method: 'PUT',
+    headers: { 'Content-Type': file.type || 'application/octet-stream' },
+    body: file,
+  })
+  if (!upRes.ok) throw new Error(`File upload failed (${upRes.status})`)
+  return signJson.path
+}
+
+async function sendContact(data, files) {
+  // Upload files first (if any)
+  const paths = []
+  for (const f of files) {
+    const p = await uploadFile(f)
+    paths.push(p)
+  }
+  // Submit form data to our Vercel function (uses service key to insert)
+  const res = await fetch('/api/contact', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: data.get('name'),
+      email: data.get('email'),
+      social: data.get('social') || '',
+      subject: data.get('subject'),
+      message: data.get('message'),
+      files: paths,
+    }),
+  })
+  const json = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(json.error || `Submit failed (${res.status})`)
+}
 
 const formatSize = (b) => (b < 1024 * 1024 ? `${Math.ceil(b / 1024)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`)
 
@@ -444,22 +499,15 @@ export function Contact() {
   const onSubmit = async (e) => {
     e.preventDefault()
     const form = e.currentTarget
-    if (!ENDPOINT) {
-      setStatus({ type: 'error', text: 'The contact form is not connected yet. Please try again later.' })
-      return
-    }
     const data = new FormData(form)
-    data.delete('attachments')
-    files.forEach((f) => data.append('attachments', f))
     setStatus({ type: 'sending', text: 'Sending…' })
     try {
-      const res = await fetch(ENDPOINT, { method: 'POST', body: data, headers: { Accept: 'application/json' } })
-      if (!res.ok) throw new Error(res.statusText)
+      await sendContact(data, files)
       form.reset()
       setFiles([])
-      setStatus({ type: 'success', text: 'Message sent! I’ll get back to you soon.' })
-    } catch {
-      setStatus({ type: 'error', text: 'Something went wrong. Please try again.' })
+      setStatus({ type: 'success', text: "Message sent! I'll get back to you soon." })
+    } catch (err) {
+      setStatus({ type: 'error', text: err?.message || 'Something went wrong. Please try again.' })
     }
   }
 
@@ -501,16 +549,20 @@ export function Contact() {
         <form className="contact-form" onSubmit={onSubmit}>
           <div className="field-row">
             <label className="field">
-              <span>Name</span>
-              <input name="name" type="text" required autoComplete="name" placeholder="Your name" />
+              <span>Full Name <span className="field-req">*</span></span>
+              <input name="name" type="text" required autoComplete="name" placeholder="e.g. Juan Dela Cruz" />
             </label>
             <label className="field">
-              <span>Email</span>
+              <span>Email <span className="field-req">*</span></span>
               <input name="email" type="email" required autoComplete="email" placeholder="you@email.com" />
             </label>
           </div>
           <label className="field">
-            <span>Subject</span>
+            <span>Facebook / Instagram Name</span>
+            <input name="social" type="text" autoComplete="off" placeholder="e.g. @yourname or facebook.com/yourname" />
+          </label>
+          <label className="field">
+            <span>Subject <span className="field-req">*</span></span>
             <input name="subject" type="text" required placeholder="e.g. Landing page redesign" />
           </label>
           <label className="field">

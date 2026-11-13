@@ -1,4 +1,4 @@
-const CACHE = 'van-admin-v1'
+const CACHE = 'van-admin-v2'
 const SHELL = [
   '/admin',
   '/admin/index.html',

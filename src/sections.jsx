@@ -67,6 +67,7 @@ export function Nav() {
       <nav className="nav-links">
         <a href="#about">About</a>
         <a href="#work">Work</a>
+        <a href="#projects">Projects</a>
         <a href="#process">Process</a>
         <a href="#testimonials">Testimonials</a>
       </nav>
@@ -288,6 +289,141 @@ export function Features() {
               <p>{f.text}</p>
             </div>
           ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+const PROJECTS = [
+  {
+    name: 'GateQR',
+    badge: 'Live project',
+    text: 'Intelligent vehicle pass and security access management for a university campus. Community members register and get QR passes, gate guards scan and verify them, and administrators manage registrations and records from one portal.',
+    tags: ['Web App', 'QR Passes', 'Role-based Access', 'Google Sign-in'],
+    screens: [
+      { label: 'Community Login', url: 'https://gateqr-omega.vercel.app/login', img: '/projects/gateqr-login.jpg' },
+      { label: 'Guard Portal', url: 'https://gateqr-omega.vercel.app/guard/login', img: '/projects/gateqr-guard.jpg' },
+      { label: 'Admin Portal', url: 'https://gateqr-omega.vercel.app/admin/registrations', img: '/projects/gateqr-admin.jpg' },
+    ],
+  },
+  {
+    name: 'B-Health',
+    badge: 'Live project',
+    text: 'Barangay digital health system. Residents book appointments, view health records and get real-time updates from the mobile app, while health center administrators run operations from a secure dashboard.',
+    tags: ['Mobile App', 'Admin Dashboard', 'Appointments', 'Health Records'],
+    screens: [
+      { label: 'App Download', url: 'https://b-health-download.vercel.app/', img: '/projects/bhealth-download.jpg' },
+      { label: 'Admin Login', url: 'https://b-health-admin.vercel.app/admin/login', img: '/projects/bhealth-admin.jpg' },
+    ],
+  },
+]
+
+function ProjectCard({ project }) {
+  const [i, setI] = useState(0)
+  const s = project.screens[i]
+  const host = s.url.replace(/^https?:\/\//, '')
+
+  return (
+    <div className="project">
+      <div className="project-preview">
+        <div className="project-tabs" role="tablist">
+          {project.screens.map((t, n) => (
+            <button
+              key={t.label}
+              type="button"
+              role="tab"
+              aria-selected={n === i}
+              className={n === i ? 'on' : ''}
+              onClick={() => setI(n)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <a className="browser" href={s.url} target="_blank" rel="noreferrer">
+          <div className="browser-bar">
+            <span /><span /><span />
+            <em>{host}</em>
+          </div>
+          <div className="browser-shot">
+            {project.screens.map((t, n) => (
+              <img
+                key={t.label}
+                src={t.img}
+                alt={`${project.name} ${t.label} screen`}
+                loading="lazy"
+                className={n === i ? 'on' : ''}
+              />
+            ))}
+          </div>
+        </a>
+      </div>
+      <div className="project-copy">
+        <span className="badge badge-sm">{project.badge}</span>
+        <h3>{project.name}</h3>
+        <p>{project.text}</p>
+        <div className="project-tags">
+          {project.tags.map((t) => <span key={t}>{t}</span>)}
+        </div>
+        <div className="project-links">
+          <a className="btn btn-primary btn-sm" href={project.screens[0].url} target="_blank" rel="noreferrer">
+            Visit Live Site <ArrowIcon />
+          </a>
+          {project.screens.slice(1).map((t) => (
+            <a className="project-link" key={t.label} href={t.url} target="_blank" rel="noreferrer">
+              {t.label} ↗
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export function Projects() {
+  const track = useRef(null)
+  const [page, setPage] = useState(0)
+
+  const go = (n) => {
+    const el = track.current
+    if (!el) return
+    const next = Math.max(0, Math.min(PROJECTS.length - 1, n))
+    el.scrollTo({ left: next * el.clientWidth, behavior: 'smooth' })
+  }
+
+  const onScroll = (e) => {
+    const el = e.currentTarget
+    setPage(Math.round(el.scrollLeft / el.clientWidth))
+  }
+
+  return (
+    <section id="projects" className="section">
+      <div className="section-inner reveal">
+        <h2 className="section-title">
+          Featured
+          <br />
+          <span className="grad">Projects</span>
+        </h2>
+        <div className="projects-wrap">
+          <div className="projects" ref={track} onScroll={onScroll}>
+            {PROJECTS.map((p) => <ProjectCard key={p.name} project={p} />)}
+          </div>
+          <div className="projects-nav">
+            <button type="button" aria-label="Previous project" disabled={page === 0} onClick={() => go(page - 1)}>←</button>
+            <div className="projects-dots">
+              {PROJECTS.map((p, n) => (
+                <button
+                  key={p.name}
+                  type="button"
+                  aria-label={`Show ${p.name}`}
+                  className={n === page ? 'on' : ''}
+                  onClick={() => go(n)}
+                />
+              ))}
+            </div>
+            <button type="button" aria-label="Next project" disabled={page === PROJECTS.length - 1} onClick={() => go(page + 1)}>→</button>
+          </div>
         </div>
       </div>
     </section>
@@ -660,6 +796,7 @@ export function Footer() {
           <h4>Quick Links</h4>
           <a href="#about">About</a>
           <a href="#work">Work</a>
+          <a href="#projects">Projects</a>
           <a href="#process">Process</a>
           <a href="#testimonials">Testimonials</a>
         </div>

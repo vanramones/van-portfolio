@@ -1287,3 +1287,215 @@ button.btn {
     gap: 30px;
   }
 }
+
+
+/* ── Projects ── */
+.project {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 40px;
+  align-items: center;
+  text-align: left;
+  padding: 28px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  backdrop-filter: blur(14px);
+}
+
+.project-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.project-tabs button {
+  padding: 7px 14px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.project-tabs button:hover { color: var(--text); }
+
+.project-tabs button.on {
+  color: #fff;
+  background: linear-gradient(135deg, var(--blue), var(--indigo));
+  border-color: transparent;
+}
+
+.browser {
+  display: block;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--panel-solid);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  text-decoration: none;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.browser:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 30px 70px rgba(59, 130, 246, 0.25);
+}
+
+.browser-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--border);
+}
+
+.browser-bar span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.browser-bar em {
+  margin-left: 10px;
+  font-style: normal;
+  font-size: 11.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.browser-shot {
+  position: relative;
+  aspect-ratio: 16 / 10;
+}
+
+.browser-shot img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.35s;
+}
+
+.browser-shot img.on { opacity: 1; }
+
+.project-copy h3 {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 12px;
+}
+
+.project-copy p {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.65;
+  margin: 0 0 18px;
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.project-tags span {
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #c7d2fe;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+}
+
+.project-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.project-link {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #a5b4fc;
+  text-decoration: none;
+}
+
+.project-link:hover { color: #fff; }
+
+@media (max-width: 900px) {
+  .project { grid-template-columns: 1fr; padding: 18px; gap: 24px; }
+}
+
+.projects {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.projects::-webkit-scrollbar { display: none; }
+
+.projects > .project {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  box-sizing: border-box;
+}
+
+.projects-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 22px;
+}
+
+.projects-nav > button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font: inherit;
+  font-size: 16px;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.projects-nav > button:hover:not(:disabled) { border-color: var(--indigo); }
+.projects-nav > button:disabled { opacity: 0.35; cursor: default; }
+
+.projects-dots { display: flex; gap: 8px; }
+
+.projects-dots button {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.projects-dots button.on {
+  width: 24px;
+  background: linear-gradient(90deg, var(--blue), var(--indigo));
+}
+

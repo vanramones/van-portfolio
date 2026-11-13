@@ -317,6 +317,15 @@ const PROJECTS = [
       { label: 'Admin Login', url: 'https://b-health-admin.vercel.app/admin/login', img: '/projects/bhealth-admin.jpg' },
     ],
   },
+  {
+    name: 'Allen Shores PH',
+    badge: 'Live project',
+    text: 'Beach discovery platform for Allen, Northern Samar. Visitors search and explore beaches, compare destinations side by side, bookmark favorites and read honest reviews and ratings.',
+    tags: ['Web App', 'Search', 'Compare', 'Reviews & Bookmarks'],
+    screens: [
+      { label: 'Home', url: 'https://allenshores-client.vercel.app/', img: '/projects/allenshores-home.jpg' },
+    ],
+  },
 ]
 
 function ProjectCard({ project }) {
